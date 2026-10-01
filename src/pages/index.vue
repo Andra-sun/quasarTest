@@ -1,94 +1,114 @@
 <template>
-  <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          icon="menu"
-          aria-label="Menu"
-          @click="toggleLeftDrawer"
-        />
+  <q-page class="q-pa-md">
+    <h1 class="text-h5 text-weight-bold q-mt-none q-mb-md">Eventos na cidade</h1>
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
+    <!-- filtor start -->
+    <div class="row q-gutter-sm q-mb-sm">
+      <q-chip
+        v-for="d in dateOptions"
+        :key="d.value"
+        clickable
+        :color="dateFilter === d.value ? 'primary' : 'grey-9'"
+        :text-color="dateFilter === d.value ? 'black' : 'white'"
+        @click="dateFilter = d.value"
+        >{{ d.label }}</q-chip
+      >
+      <q-chip
+        clickable
+        icon="paid"
+        :color="onlyFree ? 'primary' : 'grey-9'"
+        :text-color="onlyFree ? 'black' : 'white'"
+        @click="onlyFree = !onlyFree"
+        >Grátis</q-chip
+      >
+    </div>
 
-        <div>Quasar v{{ $q.version }}</div>
-      </q-toolbar>
-    </q-header>
+    <div class="row q-gutter-sm q-mb-lg">
+      <q-chip
+        v-for="s in esportes"
+        :key="s.slug"
+        clickable
+        :icon="s.icon"
+        :color="sportFilter === s.slug ? 'primary' : 'grey-9'"
+        :text-color="sportFilter === s.slug ? 'black' : 'white'"
+        @click="sportFilter = sportFilter === s.slug ? null : s.slug"
+        >{{ s.label }}</q-chip
+      >
+    </div>
+    <!-- filtro end -->
 
-    <q-drawer v-model="leftDrawerOpen" show-if-above bordered>
-      <q-list>
-        <q-item-label header> Essential Links </q-item-label>
+    <!-- ##### -->
 
-        <EssentialLink
-          v-for="link in linksList"
-          :key="link.label"
-          v-bind="link"
-        />
-      </q-list>
-    </q-drawer>
+    <!-- ao vivo start -->
+    <template v-if="live.length">
+      <h2 class="text-h6 text-weight-bold q-mt-none">Ao vivo agora</h2>
+      <div class="row q-col-gutter-md q-mb-lg">
+        <div v-for="e in live" :key="e.id" class="col-12 col-sm-6 col-lg-3">
+          <EventCard :event="e" />
+        </div>
+      </div>
+    </template>
+    <!-- ao vivo end -->
 
-    <q-page-container>
-      <router-view />
-    </q-page-container>
-  </q-layout>
+    <!-- ##### -->
+
+    <!-- proximo start -->
+    <h2 class="text-h6 text-weight-bold q-mt-none">Próximos eventos</h2>
+    <div v-if="upcoming.length" class="row q-col-gutter-md">
+      <div v-for="e in upcoming" :key="e.id" class="col-12 col-sm-6 col-md-3">
+        <EventCard :event="e" />
+      </div>
+    </div>
+    <!-- proximo end -->
+
+    <!-- ##### -->
+
+    <div v-else class="text-grey-5 column items-center q-pa-xl">
+      <q-icon name="event_busy" size="48px" />
+      <div class="q-mt-sm">Nenhum evento encontrado com esses filtros</div>
+    </div>
+  </q-page>
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
-import EssentialLink, {
-  type EssentialLinkProps
-} from "@/components/EssentialLink.vue";
+import { computed, ref } from 'vue';
+import EventCard from '@/components/events/EventCard.vue';
+import { events } from '@/data/events';
+import { esportes } from '@/config/sports';
 
-const linksList: EssentialLinkProps[] = [
-  {
-    label: "Docs",
-    caption: "quasar.dev",
-    icon: "school",
-    link: "https://quasar.dev"
-  },
-  {
-    label: "GitHub",
-    caption: "github.com/quasarframework",
-    icon: "code",
-    link: "https://github.com/quasarframework"
-  },
-  {
-    label: "Discord Chat Channel",
-    caption: "chat.quasar.dev",
-    icon: "chat",
-    link: "https://chat.quasar.dev"
-  },
-  {
-    label: "Forum",
-    caption: "forum.quasar.dev",
-    icon: "record_voice_over",
-    link: "https://forum.quasar.dev"
-  },
-  {
-    label: "Twitter",
-    caption: "@quasarframework",
-    icon: "rss_feed",
-    link: "https://twitter.quasar.dev"
-  },
-  {
-    label: "Facebook",
-    caption: "@QuasarFramework",
-    icon: "public",
-    link: "https://facebook.quasar.dev"
-  },
-  {
-    label: "Quasar Awesome",
-    caption: "Community Quasar projects",
-    icon: "favorite",
-    link: "https://awesome.quasar.dev"
-  }
+type DateFilter = 'todos' | 'hoje' | 'amanha' | 'fds';
+
+const dateOptions: { label: string; value: DateFilter }[] = [
+  { label: 'Todos', value: 'todos' },
+  { label: 'Hoje', value: 'hoje' },
+  { label: 'Amanhã', value: 'amanha' },
+  { label: 'Fim de semana', value: 'fds' },
 ];
 
-const leftDrawerOpen = ref(false);
+const dateFilter = ref<DateFilter>('todos');
+const sportFilter = ref<string | null>(null);
+const onlyFree = ref(false);
 
-function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
-}
+const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+
+const filtered = computed(() =>
+  events.filter((e) => {
+    if (sportFilter.value && e.sport !== sportFilter.value) return false;
+    if (onlyFree.value && !e.free) return false;
+
+    const d = new Date(e.start);
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 86_400_000);
+
+    if (dateFilter.value === 'hoje') return sameDay(d, now);
+    if (dateFilter.value === 'amanha') return sameDay(d, tomorrow);
+    if (dateFilter.value === 'fds') return [0, 6].includes(d.getDay());
+    return true;
+  }),
+);
+
+const live = computed(() => filtered.value.filter((e) => e.live));
+const upcoming = computed(() =>
+  filtered.value.filter((e) => !e.live).sort((a, b) => a.start.localeCompare(b.start)),
+);
 </script>

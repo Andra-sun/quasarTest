@@ -1,0 +1,45 @@
+.app-header {
+  background: var(--app-header-bg);
+  border-bottom: 2px solid var(--app-header-border);
+  color: var(--app-header-color);
+}
+
+.search-input {
+  width: 100%;
+  max-width: 300px;
+  margin-left: 16px;
+}
+
+.app-drawer {
+  background: var(--app-drawer-bg);
+  color: var(--app-drawer-color);
+}
+
+.menu-item {
+  border-radius: 10px;
+  margin-bottom: 2px;
+  transition: background 0.2s;
+
+  &:hover {
+    background: var(--app-menu-hover-bg);
+  }
+}
+
+.menu-active {
+  background: var(--app-menu-active-bg);
+  color: var(--app-menu-active-fg);
+  font-weight: 600;
+  border-left: 3px solid var(--app-menu-active-fg);
+}
+
+.drawer-footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  background: var(--app-footer-bg);
+  border-top: 1px solid var(--app-drawer-border);
+}
+
+.app-drawer .q-scrollarea__content {
+  padding-bottom: 80px;
+}

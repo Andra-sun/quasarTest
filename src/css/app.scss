@@ -1,1 +1,40 @@
-// app global css
+// app.scss
+:root {
+  --app-header-bg:        linear-gradient(90deg, #0f1b33 0%, #1e3a8a 100%);
+  --app-header-border:    #ffa759;
+  --app-header-color:     #fff;
+
+  --app-drawer-bg:        #232834;
+  --app-drawer-color:     #e2e8f0;
+  --app-drawer-border:    rgba(255,255,255,.08);
+
+  --app-search-bg:        #fff;
+  --app-search-color:     #6ee04a;
+  --app-search-input:     #1f2430;
+
+  --app-menu-active-bg:   rgba(198,244,50,.12);
+  --app-menu-active-fg:   #ffa759;
+  --app-menu-hover-bg:    rgba(198,255,255,.06);
+
+  --app-footer-bg:        #232834;
+}
+
+body.body--light {
+  --app-header-bg:        linear-gradient(90deg, #0f1b33 0%, #1e3a8a 100%);
+  --app-header-border:    #59c8ff;
+  --app-header-color:     #fff;
+
+  --app-drawer-bg:        #f4f6f9;
+  --app-drawer-color:     #1f2430;
+  --app-drawer-border:    rgba(0,0,0,.08);
+
+  --app-search-bg:        #fff;
+  --app-search-color:     #3fa96b;
+  --app-search-input:     #1f2430;
+
+  --app-menu-active-bg:   rgba(110,224,74,.15);
+  --app-menu-active-fg:   #3fa96b;
+  --app-menu-hover-bg:    rgba(0,0,0,.04);
+
+  --app-footer-bg:        #ffffff;
+}
